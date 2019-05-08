@@ -36,6 +36,15 @@ defmodule Phoenix.LiveView.Controller do
 
   """
   def live_render(%Plug.Conn{} = conn, view, opts) do
+    conn =
+      case opts[:session] do
+        session when is_map(session) ->
+          session
+          |> Enum.reduce(conn, fn {k, v}, conn -> Plug.Conn.assign(conn, k, v) end)
+        _ ->
+          conn
+      end
+
     case LiveView.View.static_render(conn, view, opts) do
       {:ok, content} ->
         conn
